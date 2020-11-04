@@ -1,7 +1,5 @@
 package dev.fritz2.elemento
 
-import org.w3c.dom.Element
-
 /**
  * Typesafe CSS selector API.
  *
@@ -21,6 +19,7 @@ import org.w3c.dom.Element
  * ```
  */
 public interface By {
+
     public val selector: String
 
     /**
@@ -74,9 +73,6 @@ public interface By {
         /** Selects elements that have the given element name. */
         public fun element(element: String): By = ByElement(element)
 
-        /** Selects elements that have the given element name. */
-        public fun element(element: Element): By = ByElement(element.tagName.toLowerCase())
-
         /** Selects elements that have all of the given class attributes. */
         public fun classname(vararg classname: String): By = ByClassname(classname)
 
@@ -113,26 +109,44 @@ public interface By {
             ByData(name, operator, value)
 
         /** Groups the specified selectors using `,`. */
-        public fun group(selectors: Array<By>): By? = ByGroup(selectors)
+        public fun group(vararg selectors: By): By = ByGroup(selectors)
     }
 }
 
 // ------------------------------------------------------ by implementations (a-z)
 
-private open class ByAttribute(private val name: String, private val operator: AttributeOperator?, private val value: String?) :
-    By {
+private abstract class ByBase : By {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class.js != other::class.js) return false
+
+        other as By
+        if (selector != other.selector) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return selector.hashCode()
+    }
+}
+
+private open class ByAttribute(
+    private val name: String,
+    private val operator: AttributeOperator?,
+    private val value: String?
+) : ByBase(), By {
 
     override val selector: String
         get(): String = buildString {
             append("[").append(name)
             if (value != null && value.isNotEmpty() && operator != null) {
                 append(operator.operator)
-                val needsQuotes: Boolean = needsQuotes(value)
-                if (needsQuotes) {
+                val unquotable = isUnquotableCSS(value)
+                if (!unquotable) {
                     append("\"")
                 }
                 append(value)
-                if (needsQuotes) {
+                if (!unquotable) {
                     append("\"")
                 }
             }
@@ -140,27 +154,29 @@ private open class ByAttribute(private val name: String, private val operator: A
         }
 
     // Taken from https://mothereff.in/unquoted-attributes
-    private fun needsQuotes(value: String): Boolean {
-        if (value == "" || value == "-") return false
-
+    private fun isUnquotableCSS(value: String): Boolean {
+        if (value == "" || value == "-") {
+            return false
+        }
         val r0 = """\\([0-9A-Fa-f]{1,6})[ \t\n\f\r]?""".toRegex()
         val r1 = """\\.""".toRegex()
         val replaced = value
             .replace(r0, "a")
             .replace(r1, "a")
 
-        val m0 = """[\00-\x2C\x2E\x2F\x3A-\x40\x5B-\x5E\x60\x7B-\x9F]""".toRegex()
-        val m1 = """^-?\d""".toRegex()
-        return !(m0.matches(replaced) || m1.matches(replaced))
+        val m0 = """[\u0000-\u002c\u002e\u002f\u003A-\u0040\u005B-\u005E\u0060\u007B-\u009f]""".toRegex()
+        val m1 = """^(?:-?\d|--)""".toRegex()
+        return !(m0.containsMatchIn(replaced) || m1.containsMatchIn(replaced))
     }
 }
 
-private class ByClassname(private val classnames: Array<out String>) : By {
+private class ByClassname(private val classnames: Array<out String>) : ByBase(), By {
     override val selector: String
         get() = classnames.joinToString(".", ".")
 }
 
-private class ByCombination(private val left: By, private val combinator: Combinator, private val right: By) : By {
+private class ByCombination(private val left: By, private val combinator: Combinator, private val right: By) :
+    ByBase(), By {
     override val selector: String
         get() = left.selector + combinator.operator + right.selector
 }
@@ -176,21 +192,21 @@ private class ByData(name: String, operator: AttributeOperator?, value: String?)
     }
 }
 
-private class ByElement(element: String) : By {
+private class ByElement(element: String) : ByBase(), By {
     override val selector: String = element
 }
 
-private class ByGroup(private val selectors: Array<By>) : By {
+private class ByGroup(private val selectors: Array<out By>) : ByBase(), By {
     override val selector: String
         get() = selectors.joinToString(", ") { it.selector }
 }
 
-private class ById(private val id: String) : By {
+private class ById(private val id: String) : ByBase(), By {
     override val selector: String
         get() = "#$id"
 }
 
-private class BySelector(override val selector: String) : By
+private class BySelector(override val selector: String) : ByBase(), By
 
 // ------------------------------------------------------ enums
 
