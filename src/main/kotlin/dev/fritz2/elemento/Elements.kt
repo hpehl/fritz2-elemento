@@ -24,7 +24,7 @@ public operator fun DOMTokenList.minusAssign(value: String) {
 
 // ------------------------------------------------------ parent / child
 
-public fun Element.appendAll(elements: Elements) {
+public fun Element.appendAll(elements: List<Element>) {
     elements.forEach { this.appendChild(it) }
 }
 
@@ -37,11 +37,6 @@ public fun Node?.removeFromParent() {
 public fun elements(content: HtmlElements.() -> Unit): List<Element> = render {
     div { content(this) }
 }.domNode.childNodes.asList().map { it.unsafeCast<Element>() }
-
-public interface Elements : Iterable<Element> {
-    public val elements: List<Element>
-    public override fun iterator(): Iterator<Element> = elements.iterator()
-}
 
 // ------------------------------------------------------ aria
 
@@ -70,7 +65,11 @@ public class Aria(private val element: Element) {
 public var Element.hidden: Boolean
     get() = getAttribute("hidden")?.toBoolean() ?: false
     set(value) {
-        setAttribute("hidden", value.toString())
+        if (value) {
+            setAttribute("hidden", "")
+        } else {
+            removeAttribute("hidden")
+        }
     }
 
 public var Element.styleHidden: Boolean
