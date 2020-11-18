@@ -1,15 +1,12 @@
 package dev.fritz2.elemento
 
 import dev.fritz2.dom.WithDomNode
-import dev.fritz2.dom.html.HtmlElements
-import dev.fritz2.dom.html.render
 import org.w3c.dom.DOMTokenList
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.w3c.dom.ParentNode
-import org.w3c.dom.asList
 import kotlin.math.floor
 
 // ------------------------------------------------------ token list
@@ -33,10 +30,6 @@ public fun Node?.removeFromParent() {
         this.parentNode!!.removeChild(this)
     }
 }
-
-public fun elements(content: HtmlElements.() -> Unit): List<Element> = render {
-    div { content(this) }
-}.domNode.childNodes.asList().map { it.unsafeCast<Element>() }
 
 // ------------------------------------------------------ aria
 

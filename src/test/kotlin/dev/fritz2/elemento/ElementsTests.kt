@@ -1,6 +1,6 @@
 package dev.fritz2.elemento
 
-import dev.fritz2.dom.html.render
+import dev.fritz2.dom.html.renderElement
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -47,20 +47,8 @@ class ElementsTests : FunSpec({
         child.removeFromParent()
     }
 
-    test("elements") {
-        val elements = elements {
-            div { +"0" }
-            div { +"1" }
-            div { +"2" }
-        }
-        elements.size shouldBe 3
-        elements[0].textContent shouldBe "0"
-        elements[1].textContent shouldBe "1"
-        elements[2].textContent shouldBe "2"
-    }
-
     test("aria and tag") {
-        val tag = render { div { } }
+        val tag = renderElement { div { } }
         tag.aria["a0"] = "0"
         tag.aria["aria-a1"] = "1"
 
@@ -106,7 +94,7 @@ class ElementsTests : FunSpec({
 })
 
 private fun prepareElement(): HTMLDivElement {
-    val element = render {
+    val element = renderElement {
         div {}
     }.domNode
     document.body!!.appendChild(element)
