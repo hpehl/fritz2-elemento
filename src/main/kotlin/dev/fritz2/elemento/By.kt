@@ -9,14 +9,7 @@ package dev.fritz2.elemento
  * #main [data-list-item=foo] a[href^="http://"] > .fas.fa-check, .external[hidden]
  * ```
  *
- * ```
- * By.group(
- *         By.id("main")
- *                 .desc(By.data("listItem", "foo")
- *                         .desc(By.element("a").and(By.attribute("href", STARTS_WITH, "http://"))
- *                                 .child(By.classnames("fas", "fa-check")))),
- *         By.classname("external").and(By.attribute("hidden")));
- * ```
+ * @sample BySamples.complex
  */
 public interface By {
 
@@ -24,12 +17,9 @@ public interface By {
 
     /**
      * Combines this selector with the given selector. Use this method to express selectors like `button.primary` or
-     * `input[type=checkbox]`:
+     * `input[type=checkbox]`
      *
-     * ```
-     * By.element("button").and(By.classname("primary"))
-     * By.element("input").and(By.attribute("type", "checkbox"));
-     * ```
+     * @sample BySamples.and
      */
     public fun and(selector: By): By = combinator(Combinator.AND, selector)
 
