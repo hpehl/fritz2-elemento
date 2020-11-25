@@ -1,6 +1,7 @@
 package dev.fritz2.elemento
 
-import dev.fritz2.dom.WithDomNode
+import dev.fritz2.dom.Tag
+import kotlinx.coroutines.flow.Flow
 import org.w3c.dom.DOMTokenList
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
@@ -33,13 +34,20 @@ public fun Node?.removeFromParent() {
 
 // ------------------------------------------------------ aria
 
-public val WithDomNode<Element>.aria: Aria
-    get() = Aria(this.domNode)
+public val <E : Element> Tag<E>.aria: TagAria<E>
+    get() = TagAria(this)
 
-public val Element.aria: Aria
-    get() = Aria(this)
+public val Element.aria: ElementAria
+    get() = ElementAria(this)
 
-public class Aria(private val element: Element) {
+public class TagAria<E : Element>(private val tag: Tag<E>) : ElementAria(tag.domNode) {
+
+    public operator fun set(name: String, value: Flow<String>) {
+        tag.attr(attributeSafeKey(name), value)
+    }
+}
+
+public open class ElementAria(private val element: Element) {
 
     public operator fun contains(name: String): Boolean = element.hasAttribute(name)
 
@@ -49,7 +57,7 @@ public class Aria(private val element: Element) {
         element.setAttribute(attributeSafeKey(name), value.toString())
     }
 
-    private fun attributeSafeKey(name: String) =
+    internal fun attributeSafeKey(name: String) =
         if (name.startsWith("aria-")) name else "aria-$name"
 }
 

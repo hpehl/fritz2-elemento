@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.browser.document
+import kotlinx.coroutines.flow.flowOf
 import org.w3c.dom.HTMLDivElement
 
 class ElementsTests : FunSpec({
