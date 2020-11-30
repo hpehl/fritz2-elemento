@@ -22,6 +22,10 @@ public operator fun DOMTokenList.minusAssign(value: String) {
 
 // ------------------------------------------------------ parent / child
 
+public fun <E : Element> Element.appendAll(elements: List<Tag<E>>) {
+    elements.forEach { this.appendChild(it.domNode) }
+}
+
 public fun Element.appendAll(elements: List<Element>) {
     elements.forEach { this.appendChild(it) }
 }
