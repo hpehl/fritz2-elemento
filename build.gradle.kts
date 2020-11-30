@@ -21,11 +21,7 @@ dependencies {
 
 kotlin {
     js {
-        compilations.named("main") {
-            kotlinOptions {
-                freeCompilerArgs = listOf("-Xexplicit-api=strict")
-            }
-        }
+        explicitApi()
         browser {
             testTask {
                 useKarma {
