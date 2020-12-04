@@ -73,6 +73,9 @@ public val Element.aria: ElementAria
  */
 public class TagAria<E : Element>(private val tag: Tag<E>) : ElementAria(tag.domNode) {
 
+    /**
+     * Sets the values from the flow as values for the ARIA attribute.
+     */
     public operator fun set(name: String, value: Flow<String>) {
         tag.attr(attributeSafeKey(name), value)
     }
@@ -203,6 +206,9 @@ public fun ParentNode.querySelectorAll(selector: By): NodeList = this.querySelec
  * Convenience function to turn this element into a string.
  *
  * The string contains the element name and attributes (if any), but *no* child elements. However you can see whether the element has children in the way how the string is generated:
+ *
+ * - w/o children: `<element/>`
+ * - w/ children: `<element></element>`
  *
  * @sample DebugSamples.debug
  */
